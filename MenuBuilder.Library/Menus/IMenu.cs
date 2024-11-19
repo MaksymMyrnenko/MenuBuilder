@@ -12,5 +12,6 @@ namespace MenuBuilder
         List<IMenuOption> Options { get; }
         void Display();
         void SelectOption(string input);
+        void AddOption(IMenuOption option);
     }
 }

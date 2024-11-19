@@ -37,5 +37,10 @@ namespace MenuBuilder
                 Console.WriteLine("Invalid option.");
             }
         }
+
+        public void AddOption(IMenuOption option)
+        {
+            Options.Add(option);
+        }
     }
 }

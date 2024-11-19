@@ -1,23 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MenuBuilder;
 
-namespace MenuBuilder
+public class MenuAction : IAction
 {
-    public class MenuAction : IAction
+    private readonly Action _action;
+    private readonly string _message;
+
+    public MenuAction(Action action)
     {
-        private readonly Action _action;
+        _action = action;
+    }
 
-        public MenuAction(Action action)
-        {
-            _action = action;
-        }
+    public MenuAction(string message)
+    {
+        _message = message;
+        _action = () => Console.WriteLine(message);
+    }
 
-        public void Execute()
-        {
-            _action?.Invoke();
-        }
+    public void Execute()
+    {
+        _action?.Invoke();
     }
 }

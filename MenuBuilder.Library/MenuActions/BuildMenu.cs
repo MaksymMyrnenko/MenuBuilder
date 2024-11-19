@@ -1,25 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using MenuBuilder.MenuOptions;
+using MenuBuilder.Menus;
 
 namespace MenuBuilder
 {
     public class BuildMenu
     {
-        public IMenu CreateMenu(string menuType, string title, List<IMenuOption> options)
+        public IMenu CreateMenu(MenuType menuType, string title, Func<List<IMenuOption>> optionsGenerator)
         {
             return menuType switch
             {
-                "Numeric" => new NumericMenu(title, options),
-                "Alphabetical" => new AlphabeticalMenu(title, options),
-                "Textual" => new TextualMenu(title, options),
-                _ => throw new ArgumentException("Invalid menu type.")
+                MenuType.Numeric => new Menu<int>(title, optionsGenerator),
+                MenuType.Alphabetical => new Menu<char>(title, optionsGenerator),
+                MenuType.Textual => new Menu<string>(title, optionsGenerator),
+                _ => throw new ArgumentException("Invalid menu type")
             };
         }
 
-        public IMenuOption CreateMenuOption(string label, IAction action, IMenu subMenu = null)
+        public IMenuOption CreateMenuOption(string label, IAction action = null, IMenu subMenu = null)
         {
             return new MenuOption(label, action, subMenu);
         }
