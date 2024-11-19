@@ -1,6 +1,6 @@
-﻿using MenuBuilder.Menus;
-using MenuBuilder.MenuActions;
+﻿using MenuBuilder.MenuActions;
 using MenuBuilder.Library.Navigation;
+using MenuBuilder.Menus;
 
 namespace MenuBuilder.ConsoleApp
 {
@@ -8,10 +8,8 @@ namespace MenuBuilder.ConsoleApp
     {
         static void Main(string[] args)
         {
-            // Initialize FlowController
             var flowController = new FlowController();
 
-            // Create the main Numerical Menu
             var mainMenu = new Menu<int>("Main Menu", () => new List<IMenuOption>
             {
                 new MenuOption("Textual Menu From File", new NavigateAction(() =>
@@ -23,13 +21,12 @@ namespace MenuBuilder.ConsoleApp
 
             flowController.NavigateTo(mainMenu);
 
-            // Start the app
             RunApp(flowController);
         }
 
         private static void RunApp(FlowController flowController)
         {
-            ConsoleKey key;
+            //ConsoleKey key;
             do
             {
                 Console.Clear();
@@ -40,9 +37,8 @@ namespace MenuBuilder.ConsoleApp
 
                 flowController.CurrentMenu.SelectOption(input);
 
-                Console.WriteLine("Press Esc to exit or any key to continue...");
-                key = Console.ReadKey(intercept: true).Key;
-            } while (key != ConsoleKey.Escape);
+                //key = Console.ReadKey(intercept: true).Key;
+            } while (true);
         }
 
         private static void CreateFileMenu(FlowController flowController, string title, string folderPath)
@@ -91,15 +87,14 @@ namespace MenuBuilder.ConsoleApp
 
         private static void CreateNumericalSubMenu(FlowController flowController)
         {
-            var random = new Random(); // Random number generator
+            var random = new Random(); 
             var numericalSubMenu = new Menu<int>("Numerical Submenu", () =>
             {
                 var options = new List<IMenuOption>();
 
-                // Dynamically generate options with random numbers
-                for (int i = 1; i <= 3; i++) // For example, generate 3 random options
+                for (int i = 1; i <= 3; i++)
                 {
-                    var randomNumber = random.Next(1, 100); // Random number between 1 and 100
+                    var randomNumber = random.Next(1, 100); 
                     options.Add(new MenuOption($"Random Number: {randomNumber}", new MenuAction(() =>
                     {
                         Console.Clear();
@@ -109,11 +104,11 @@ namespace MenuBuilder.ConsoleApp
                     })));
                 }
 
-                options.Add(new MenuOption("Go back", new NavigateBackAction(flowController))); // Add "Go Back" option
+                options.Add(new MenuOption("Go back", new NavigateBackAction(flowController)));
                 return options;
             });
 
-            flowController.NavigateTo(numericalSubMenu); // Navigate to this menu
+            flowController.NavigateTo(numericalSubMenu);
         }
 
 

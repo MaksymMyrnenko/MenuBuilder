@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using MenuBuilder;
-
-namespace MenuBuilder.Menus
+﻿namespace MenuBuilder.Menus
 {
     public class Menu<T> : IMenu
     {
@@ -14,38 +10,49 @@ namespace MenuBuilder.Menus
 
         public Menu(string title, Func<List<IMenuOption>> optionsGenerator)
         {
-            Title = title ?? throw new ArgumentNullException(nameof(title));
-            OptionsGenerator = optionsGenerator ?? throw new ArgumentNullException(nameof(optionsGenerator));
-            _options = OptionsGenerator.Invoke() ?? new List<IMenuOption>();
+            Title = title;
+            OptionsGenerator = optionsGenerator;
+            _options = OptionsGenerator.Invoke();
         }
 
         public void Display()
         {
-            Console.WriteLine($"\n{Title}");
-            for (int i = 0; i < _options.Count; i++)
+            Console.Clear();
+            Console.WriteLine(Title);
+
+            if (typeof(T) == typeof(string))
             {
-                Console.WriteLine($"{i + 1}. {_options[i].Label}");
+                foreach (var option in _options)
+                {
+                    Console.WriteLine(option.Label);
+                }
+            }
+            else if (typeof(T) == typeof(char))
+            {
+                char letter = 'A';
+                foreach (var option in _options)
+                {
+                    Console.WriteLine($"{letter++}. {option.Label}");
+                }
+            }
+            else
+            {
+                int index = 1;
+                foreach (var option in _options)
+                {
+                    Console.WriteLine($"{index++}. {option.Label}");
+                }
             }
         }
 
         public void AddOption(IMenuOption option)
         {
-            if (option == null) throw new ArgumentNullException(nameof(option));
             _options.Add(option);
-        }
-
-        public void RefreshOptions()
-        {
-            _options = OptionsGenerator.Invoke() ?? new List<IMenuOption>();
         }
 
         public void SelectOption(string input)
         {
-            if (int.TryParse(input, out int index) && index >= 1 && index <= _options.Count)
-            {
-                _options[index - 1].PerformAction();
-            }
-            else
+            if (typeof(T) == typeof(string))
             {
                 var option = _options.Find(o => o.Label.Equals(input, StringComparison.OrdinalIgnoreCase));
                 if (option != null)
@@ -54,7 +61,41 @@ namespace MenuBuilder.Menus
                 }
                 else
                 {
-                    Console.WriteLine("Invalid option. Please try again.");
+                    Console.WriteLine("Invalid option. Press any key to return to the menu...");
+                    Console.ReadKey();
+                }
+            }
+            else if (typeof(T) == typeof(char))
+            {
+                if (input.Length == 1 && char.IsLetter(input[0]))
+                {
+                    int index = char.ToUpper(input[0]) - 'A';
+                    if (index >= 0 && index < _options.Count)
+                    {
+                        _options[index].PerformAction();
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid option. Press any key to return to the menu...");
+                        Console.ReadKey();
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Invalid option. Press any key to return to the menu...");
+                    Console.ReadKey();
+                }
+            }
+            else
+            {
+                if (int.TryParse(input, out int index) && index > 0 && index <= _options.Count)
+                {
+                    _options[index - 1].PerformAction();
+                }
+                else
+                {
+                    Console.WriteLine("Invalid option. Press any key to return to the menu...");
+                    Console.ReadKey();
                 }
             }
         }

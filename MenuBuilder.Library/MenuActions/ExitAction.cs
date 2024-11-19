@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace MenuBuilder.MenuActions
+﻿namespace MenuBuilder.MenuActions
 {
     public class ExitAction : IAction
     {
@@ -8,6 +6,7 @@ namespace MenuBuilder.MenuActions
         {
             Console.WriteLine("Exiting the application...");
             Environment.Exit(0);
+            
         }
     }
 }

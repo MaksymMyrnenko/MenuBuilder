@@ -1,7 +1,4 @@
-﻿using System;
-using MenuBuilder;
-
-namespace MenuBuilder.MenuActions
+﻿namespace MenuBuilder.MenuActions
 {
     public class NavigateAction : IAction
     {
