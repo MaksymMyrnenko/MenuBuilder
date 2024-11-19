@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MenuBuilder.Library.Navigation;
 
-namespace MenuBuilder.MenuOptions
+namespace MenuBuilder
 {
     public class MenuOption : IMenuOption
     {

@@ -1,105 +1,129 @@
-﻿// See https://aka.ms/new-console-template for more information
-using MenuBuilder;
+﻿using MenuBuilder.Menus;
+using MenuBuilder.MenuActions;
 using MenuBuilder.Library.Navigation;
-using System.Reflection.Emit;
 
-
-class Program
+namespace MenuBuilder.ConsoleApp
 {
-    static void Main()
+    class Program
     {
-        var flowController = new FlowController();
-
-        // Define the options for the main menu
-        var mainMenuOptions = new List<IMenuOption>
+        static void Main(string[] args)
         {
-            CreateMenuOption("Create Numeric Menu", flowController, null, CreateSubMenu("Numeric", flowController)),
-            CreateMenuOption("Create Alphabetical Menu", flowController, null, CreateSubMenu("Alphabetical", flowController)),
-            CreateMenuOption("Create Textual Menu", flowController, null, CreateSubMenu("Textual", flowController)),
-            CreateMenuOption("Exit", flowController, new MenuAction(() => Environment.Exit(0)))
-        };
+            // Initialize FlowController
+            var flowController = new FlowController();
 
-        // Create the main menu with custom options
-        var mainMenu = new NumericMenu("Main Menu", mainMenuOptions);
+            // Create the main Numerical Menu
+            var mainMenu = new Menu<int>("Main Menu", () => new List<IMenuOption>
+            {
+                new MenuOption("Textual Menu From File", new NavigateAction(() =>
+                    CreateFileMenu(flowController, "Textual Menu From File", @"C:\Code\MenuBuilder\MenuBuilder\Test_Menu_FIles"))),
+                new MenuOption("Alphabetical Menu", new NavigateAction(() =>
+                    CreateAlphabeticalMenu(flowController))),
+                new MenuOption("Exit from the app", new ExitAction())
+            });
 
-        // Initialize the flow controller with the main menu
-        flowController.NavigateTo(mainMenu);
+            flowController.NavigateTo(mainMenu);
 
-        ConsoleKey key;
-        do
+            // Start the app
+            RunApp(flowController);
+        }
+
+        private static void RunApp(FlowController flowController)
         {
-            Console.Write("Select an option (or press 'B' to go back): ");
-            string input = Console.ReadLine();
+            ConsoleKey key;
+            do
+            {
+                Console.Clear();
+                flowController.CurrentMenu.Display();
 
-            if (input.Equals("B", StringComparison.OrdinalIgnoreCase))
-            {
-                flowController.NavigateBack();
-            }
-            else
-            {
+                Console.Write("Select an option: ");
+                string input = Console.ReadLine();
+
                 flowController.CurrentMenu.SelectOption(input);
-            }
 
-            Console.WriteLine("Press Esc to exit or any key to continue...");
-            key = Console.ReadKey(intercept: true).Key;
+                Console.WriteLine("Press Esc to exit or any key to continue...");
+                key = Console.ReadKey(intercept: true).Key;
+            } while (key != ConsoleKey.Escape);
+        }
 
-        } while (key != ConsoleKey.Escape);
-    }
-
-    private static IMenuOption CreateMenuOption(string label, FlowController flowController, IAction action = null, IMenu subMenu = null)
-    {
-        return new MenuOption(label, action, subMenu, flowController);
-    }
-
-    private static IMenu CreateSubMenu(string menuType, FlowController flowController)
-    {
-        Console.WriteLine("Enter the name for Option 1:");
-        string option1Name = Console.ReadLine();
-        Console.WriteLine("Enter the name for Option 2:");
-        string option2Name = Console.ReadLine();
-
-        var options = new List<IMenuOption>
-    {
-        CreateMenuOption(option1Name, flowController, new MenuAction(() => Console.WriteLine($"{option1Name} selected"))),
-        CreateMenuOption(option2Name, flowController, new MenuAction(() => Console.WriteLine($"{option2Name} selected"))),
-        
-        // Make sure to pass the correct menuType to create a new submenu of the same type
-        CreateMenuOption("Create New Submenu", flowController, null, CreateNestedSubMenu(menuType, flowController)),
-
-        CreateMenuOption("Go Back", flowController, new MenuAction(() => flowController.NavigateBack()))
-    };
-
-        return menuType switch
+        private static void CreateFileMenu(FlowController flowController, string title, string folderPath)
         {
-            "Numeric" => new NumericMenu($"{menuType} Submenu", options),
-            "Alphabetical" => new AlphabeticalMenu($"{menuType} Submenu", options),
-            "Textual" => new TextualMenu($"{menuType} Submenu", options),
-            _ => throw new ArgumentException("Invalid menu type")
-        };
-    }
+            var fileMenu = new Menu<string>(title, () =>
+            {
+                var options = new List<IMenuOption>();
+                var files = Directory.GetFiles(folderPath);
+                foreach (var file in files)
+                {
+                    var fileName = Path.GetFileName(file);
+                    options.Add(new MenuOption(fileName, new MenuAction(() =>
+                    {
+                        Console.Clear();
+                        Console.WriteLine($"Contents of {fileName}:\n");
+                        Console.WriteLine(File.ReadAllText(file));
+                        Console.WriteLine("\nPress any key to return to the file list...");
+                        Console.ReadKey();
+                    })));
+                }
+                options.Add(new MenuOption("Go back", new NavigateBackAction(flowController)));
+                return options;
+            });
 
-    private static IMenu CreateNestedSubMenu(string menuType, FlowController flowController)
-    {
-        Console.WriteLine("Creating a new submenu:");
-        Console.WriteLine("Enter the name for Option 1:");
-        string option1Name = Console.ReadLine();
-        Console.WriteLine("Enter the name for Option 2:");
-        string option2Name = Console.ReadLine();
+            flowController.NavigateTo(fileMenu);
+        }
 
-        var options = new List<IMenuOption>
-    {
-        CreateMenuOption(option1Name, flowController, new MenuAction(() => Console.WriteLine($"{option1Name} selected"))),
-        CreateMenuOption(option2Name, flowController, new MenuAction(() => Console.WriteLine($"{option2Name} selected"))),
-        CreateMenuOption("Go Back", flowController, new MenuAction(() => flowController.NavigateBack()))
-    };
-
-        // Use the menuType to create the correct type of nested submenu
-        return menuType switch
+        private static void CreateAlphabeticalMenu(FlowController flowController)
         {
-            "Numeric" => new NumericMenu($"{menuType} Nested Submenu", options),
-            "Alphabetical" => new AlphabeticalMenu($"{menuType} Nested Submenu", options),
-            "Textual" => new TextualMenu($"{menuType} Nested Submenu", options),
-            _ => throw new ArgumentException("Invalid menu type")
-        };
+            var alphabeticalMenu = new Menu<char>("Alphabetical Menu", () => new List<IMenuOption>
+            {
+                new MenuOption("Numerical Menu", new NavigateAction(() =>
+                    CreateNumericalSubMenu(flowController))),
+                new MenuOption("OptionPrintHello", new MenuAction(() =>
+                {
+                    Console.Clear();
+                    Console.WriteLine("Hello");
+                    Console.WriteLine("\nPress any key to return...");
+                    Console.ReadKey();
+                })),
+                new MenuOption("Go back", new NavigateBackAction(flowController))
+            });
+
+            flowController.NavigateTo(alphabeticalMenu);
+        }
+
+        private static void CreateNumericalSubMenu(FlowController flowController)
+        {
+            var random = new Random(); // Random number generator
+            var numericalSubMenu = new Menu<int>("Numerical Submenu", () =>
+            {
+                var options = new List<IMenuOption>();
+
+                // Dynamically generate options with random numbers
+                for (int i = 1; i <= 3; i++) // For example, generate 3 random options
+                {
+                    var randomNumber = random.Next(1, 100); // Random number between 1 and 100
+                    options.Add(new MenuOption($"Random Number: {randomNumber}", new MenuAction(() =>
+                    {
+                        Console.Clear();
+                        Console.WriteLine($"You selected the random number: {randomNumber}");
+                        Console.WriteLine("Press any key to return to the menu...");
+                        Console.ReadKey();
+                    })));
+                }
+
+                options.Add(new MenuOption("Go back", new NavigateBackAction(flowController))); // Add "Go Back" option
+                return options;
+            });
+
+            flowController.NavigateTo(numericalSubMenu); // Navigate to this menu
+        }
+
+
+        private static void PrintRandomNumber()
+        {
+            var random = new Random();
+            Console.Clear();
+            Console.WriteLine($"Random Number: {random.Next(1, 101)}");
+            Console.WriteLine("\nPress any key to return...");
+            Console.ReadKey();
+        }
     }
 }
