@@ -10,7 +10,7 @@ namespace MenuBuilder.ConsoleApp
         {
             var flowController = new FlowController();
 
-            var mainMenu = new Menu<int>("Main Menu", () => new List<IMenuOption>
+            var mainMenu = new NumericMenu("Main Menu", new List<IMenuOption>
             {
                 new MenuOption("Textual Menu From File", new NavigateAction(() =>
                     CreateFileMenu(flowController, "Textual Menu From File", @"C:\Code\MenuBuilder\MenuBuilder\Test_Menu_FIles"))),
@@ -26,24 +26,21 @@ namespace MenuBuilder.ConsoleApp
 
         private static void RunApp(FlowController flowController)
         {
-            //ConsoleKey key;
             do
             {
                 Console.Clear();
-                flowController.CurrentMenu.Display();
+                flowController.CurrentMenu.DisplayOptions();
 
                 Console.Write("Select an option: ");
                 string input = Console.ReadLine();
 
                 flowController.CurrentMenu.SelectOption(input);
-
-                //key = Console.ReadKey(intercept: true).Key;
             } while (true);
         }
 
         private static void CreateFileMenu(FlowController flowController, string title, string folderPath)
         {
-            var fileMenu = new Menu<string>(title, () =>
+            var fileMenu = new TextualMenu(title, () =>
             {
                 var options = new List<IMenuOption>();
                 var files = Directory.GetFiles(folderPath);
@@ -68,7 +65,7 @@ namespace MenuBuilder.ConsoleApp
 
         private static void CreateAlphabeticalMenu(FlowController flowController)
         {
-            var alphabeticalMenu = new Menu<char>("Alphabetical Menu", () => new List<IMenuOption>
+            var alphabeticalMenu = new AlphabeticalMenu("Alphabetical Menu", new List<IMenuOption>
             {
                 new MenuOption("Numerical Menu", new NavigateAction(() =>
                     CreateNumericalSubMenu(flowController))),
@@ -87,14 +84,14 @@ namespace MenuBuilder.ConsoleApp
 
         private static void CreateNumericalSubMenu(FlowController flowController)
         {
-            var random = new Random(); 
-            var numericalSubMenu = new Menu<int>("Numerical Submenu", () =>
+            var random = new Random();
+            var numericalSubMenu = new NumericMenu("Numerical Submenu", () =>
             {
                 var options = new List<IMenuOption>();
 
                 for (int i = 1; i <= 3; i++)
                 {
-                    var randomNumber = random.Next(1, 100); 
+                    var randomNumber = random.Next(1, 100);
                     options.Add(new MenuOption($"Random Number: {randomNumber}", new MenuAction(() =>
                     {
                         Console.Clear();
@@ -109,16 +106,6 @@ namespace MenuBuilder.ConsoleApp
             });
 
             flowController.NavigateTo(numericalSubMenu);
-        }
-
-
-        private static void PrintRandomNumber()
-        {
-            var random = new Random();
-            Console.Clear();
-            Console.WriteLine($"Random Number: {random.Next(1, 101)}");
-            Console.WriteLine("\nPress any key to return...");
-            Console.ReadKey();
         }
     }
 }

@@ -1,41 +1,33 @@
-﻿namespace MenuBuilder
+﻿namespace MenuBuilder.Menus
 {
-    public class TextualMenu : IMenu
+    public class TextualMenu : Menu<string>
     {
-        public string Title { get; private set; }
-        public List<IMenuOption> Options { get; private set; }
-
         public TextualMenu(string title, List<IMenuOption> options)
-        {
-            Title = title;
-            Options = options;
-        }
+            : base(title, options) { }
 
-        public void Display()
+        public TextualMenu(string title, Func<List<IMenuOption>> optionsGenerator)
+            : base(title, optionsGenerator) { }
+
+        public override void DisplayOptions()
         {
-            Console.WriteLine(Title);
             foreach (var option in Options)
             {
-                Console.WriteLine($"- {option.Label}");
+                Console.WriteLine(option.Label);
             }
         }
 
-        public void SelectOption(string input)
+        public override void SelectOption(string input)
         {
-            var selectedOption = Options.Find(option => option.Label.Equals(input, StringComparison.OrdinalIgnoreCase));
-            if (selectedOption != null)
+            var option = Options.Find(o => o.Label.Equals(input, StringComparison.OrdinalIgnoreCase));
+            if (option != null)
             {
-                selectedOption.PerformAction();
+                option.PerformAction();
             }
             else
             {
-                Console.WriteLine("Invalid option.");
+                Console.WriteLine("Invalid option. Press any key to return to the menu...");
+                Console.ReadKey();
             }
-        }
-
-        public void AddOption(IMenuOption option)
-        {
-            Options.Add(option);
         }
     }
 }

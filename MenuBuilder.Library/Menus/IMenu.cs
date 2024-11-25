@@ -3,8 +3,7 @@
     public interface IMenu
     {
         string Title { get; }
-        List<IMenuOption> Options { get; }
-        void Display();
+        void DisplayOptions();
         void SelectOption(string input);
         void AddOption(IMenuOption option);
     }

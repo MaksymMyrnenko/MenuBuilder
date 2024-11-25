@@ -1,48 +1,36 @@
-﻿namespace MenuBuilder
+﻿namespace MenuBuilder.Menus
 {
-    public class AlphabeticalMenu : IMenu
+    public class AlphabeticalMenu : Menu<char>
     {
-        public string Title { get; private set; }
-        public List<IMenuOption> Options { get; private set; }
-
         public AlphabeticalMenu(string title, List<IMenuOption> options)
-        {
-            Title = title;
-            Options = options;
-        }
+            : base(title, options) { }
 
-        public void Display()
+        public AlphabeticalMenu(string title, Func<List<IMenuOption>> optionsGenerator)
+            : base(title, optionsGenerator) { }
+
+        public override void DisplayOptions()
         {
-            Console.WriteLine(Title);
-            for (int i = 0; i < Options.Count; i++)
+            char letter = 'A';
+            foreach (var option in Options)
             {
-                Console.WriteLine($"{(char)('A' + i)} - {Options[i].Label}");
+                Console.WriteLine($"{letter++}. {option.Label}");
             }
         }
 
-        public void SelectOption(string input)
+        public override void SelectOption(string input)
         {
-            if (input.Length == 1 && char.IsLetter(input[0]))
+            if (input.Length == 1 && char.TryParse(input, out char optionLetter))
             {
-                int index = char.ToUpper(input[0]) - 'A';
+                int index = optionLetter - 'A';
                 if (index >= 0 && index < Options.Count)
                 {
                     Options[index].PerformAction();
-                }
-                else
-                {
-                    Console.WriteLine("Invalid option.");
+                    return;
                 }
             }
-            else
-            {
-                Console.WriteLine("Invalid option.");
-            }
-        }
 
-        public void AddOption(IMenuOption option)
-        {
-            Options.Add(option);
+            Console.WriteLine("Invalid option. Press any key to return to the menu...");
+            Console.ReadKey();
         }
     }
 }

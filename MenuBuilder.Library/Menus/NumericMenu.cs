@@ -1,40 +1,33 @@
-﻿namespace MenuBuilder
+﻿namespace MenuBuilder.Menus
 {
-    public class NumericMenu : IMenu
+    public class NumericMenu : Menu<int>
     {
-        public string Title { get; private set; }
-        public List<IMenuOption> Options { get; private set; }
-
         public NumericMenu(string title, List<IMenuOption> options)
-        {
-            Title = title;
-            Options = options;
-        }
+            : base(title, options) { }
 
-        public void Display()
+        public NumericMenu(string title, Func<List<IMenuOption>> optionsGenerator)
+            : base(title, optionsGenerator) { }
+
+        public override void DisplayOptions()
         {
-            Console.WriteLine(Title);
-            for (int i = 0; i < Options.Count; i++)
+            int index = 1;
+            foreach (var option in Options)
             {
-                Console.WriteLine($"{i + 1} - {Options[i].Label}");
+                Console.WriteLine($"{index++}. {option.Label}");
             }
         }
 
-        public void SelectOption(string input)
+        public override void SelectOption(string input)
         {
-            if (int.TryParse(input, out int index) && index > 0 && index <= Options.Count)
+            if (int.TryParse(input, out int optionNumber) && optionNumber >= 1 && optionNumber <= Options.Count)
             {
-                Options[index - 1].PerformAction();
+                Options[optionNumber - 1].PerformAction();
             }
             else
             {
-                Console.WriteLine("Invalid option.");
+                Console.WriteLine("Invalid option. Press any key to return to the menu...");
+                Console.ReadKey();
             }
-        }
-
-        public void AddOption(IMenuOption option)
-        {
-            Options.Add(option);
         }
     }
 }
